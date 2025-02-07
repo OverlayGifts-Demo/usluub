@@ -56,9 +56,7 @@
     <a-scene mindar-image="imageTargetSrc: ./targets 1.mind" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-assets>
             <video id="demoVideo1" src="updated vid.mp4" playsinline></video>
-            <video id="demoVideo2" src="0s2.mp4" playsinline></video>
-            <video id="demoVideo3" src="s3.mp4" playsinline></video>
-            <video id="demoVideo4" src="s4.mp4" playsinline></video>
+            
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -85,48 +83,51 @@
         const openWebsiteButton = document.querySelector('#openWebsiteButton');
 
         let isPlaying = false;
-        let targetVisible = false;
         let currentVideo = null;
 
-        function togglePlayPause(videoElement, button) {
-            if (!targetVisible || !videoElement) return;
+        function togglePlayPause() {
+            if (!currentVideo) return;
             if (isPlaying) {
-                videoElement.pause();
-                button.textContent = 'Play';
+                currentVideo.pause();
+                playPauseButton.textContent = 'Play';
             } else {
-                videoElement.play();
-                button.textContent = 'Pause';
+                currentVideo.play();
+                playPauseButton.textContent = 'Pause';
             }
             isPlaying = !isPlaying;
         }
 
-        playPauseButton.addEventListener('click', () => {
-            togglePlayPause(currentVideo, playPauseButton);
-        });
+        playPauseButton.addEventListener('click', togglePlayPause);
 
         function onTargetFound(videoId) {
-            targetVisible = true;
-            currentVideo = document.querySelector(videoId);
+            if (currentVideo && currentVideo.id !== videoId) {
+                currentVideo.pause();
+                currentVideo.currentTime = 0;
+            }
+
+            currentVideo = document.getElementById(videoId);
             playPauseButton.disabled = false;
+            isPlaying = false;
+            playPauseButton.textContent = 'Play';
         }
 
         function onTargetLost() {
-            targetVisible = false;
-            playPauseButton.disabled = true;
             if (currentVideo) {
                 currentVideo.pause();
+                currentVideo.currentTime = 0;
                 playPauseButton.textContent = 'Play';
                 isPlaying = false;
             }
+            playPauseButton.disabled = true;
         }
 
-        ['#target1', '#target2', '#target3', '#target4'].forEach((target, index) => {
-            document.querySelector(target).addEventListener('targetFound', () => onTargetFound(`#demoVideo${index + 1}`));
+        [['#target1', 'demoVideo1'], ['#target2', 'demoVideo2'], ['#target3', 'demoVideo3'], ['#target4', 'demoVideo4']].forEach(([target, videoId]) => {
+            document.querySelector(target).addEventListener('targetFound', () => onTargetFound(videoId));
             document.querySelector(target).addEventListener('targetLost', onTargetLost);
         });
 
         openWebsiteButton.addEventListener('click', () => {
-            window.open('https://usluub.odoo.com/', '_blank');
+            window.open('https://indian-bakery.odoo.com/', '_blank');
         });
     </script>
 </body>
